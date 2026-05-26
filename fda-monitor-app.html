@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>法規網站消息監測 App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root,[data-theme="light"]{--text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);--text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;--radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-surface-offset:#f3f0ec;--color-border:#d4d1ca;--color-text:#28251d;--color-text-muted:#66655f;--color-text-faint:#9c9a93;--color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-highlight:#cedcd8;--color-error:#a12c7b;--shadow-sm:0 1px 2px rgba(0,0,0,.06);--shadow-md:0 8px 24px rgba(0,0,0,.08);--font-body:'Noto Sans TC',sans-serif;--font-display:'Noto Sans TC',sans-serif}
+    [data-theme="dark"]{--color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;--color-surface-offset:#22211f;--color-border:#393836;--color-text:#e3e1dc;--color-text-muted:#b0aea7;--color-text-faint:#7c7a74;--color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;--shadow-sm:0 1px 2px rgba(0,0,0,.2);--shadow-md:0 10px 30px rgba(0,0,0,.28)}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:var(--font-body);font-size:var(--text-base);line-height:1.6;background:var(--color-bg);color:var(--color-text)} button,input,select,textarea{font:inherit} a{color:var(--color-primary)} .wrap{max-width:1200px;margin:0 auto;padding:var(--space-6) var(--space-4) var(--space-16)} .topbar{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);margin-bottom:var(--space-8)} .logo{display:flex;align-items:center;gap:.9rem;font-weight:800} .logo svg{width:40px;height:40px} .hero{display:grid;grid-template-columns:1.35fr .85fr;gap:var(--space-6);align-items:stretch;margin-bottom:var(--space-8)} .panel{background:var(--color-surface);border:1px solid rgba(40,37,29,.12);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)} [data-theme="dark"] .panel{border-color:rgba(255,255,255,.12)} .hero-card{padding:var(--space-8)} h1{font-size:var(--text-xl);line-height:1.12;margin:0 0 var(--space-4)} p{margin:0 0 var(--space-4);color:var(--color-text-muted)} .chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4)} .chip{padding:.45rem .75rem;border-radius:999px;background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-sm);font-weight:700} .stats{display:grid;gap:var(--space-4);padding:var(--space-8)} .stat{padding:var(--space-4);background:var(--color-surface-offset);border-radius:var(--radius-lg)} .stat b{display:block;font-size:var(--text-lg);color:var(--color-text)} .controls{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-6);margin-bottom:var(--space-8)} .form-card,.sites-card,.results-card,.preview-card{padding:var(--space-6)} .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)} .field{display:flex;flex-direction:column;gap:var(--space-2)} .field.full{grid-column:1 / -1} label{font-size:var(--text-sm);font-weight:700} input,textarea,select{width:100%;padding:.85rem 1rem;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);color:var(--color-text)} textarea{min-height:112px;resize:vertical} input:focus,textarea:focus,select:focus{outline:2px solid var(--color-primary);outline-offset:2px;border-color:var(--color-primary)} .actions{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-4)} .btn{border:0;border-radius:999px;padding:.85rem 1.1rem;min-height:44px;font-weight:800;cursor:pointer} .btn-primary{background:var(--color-primary);color:#fff} .btn-primary:hover{background:var(--color-primary-hover)} .btn-secondary{background:var(--color-surface-offset);color:var(--color-text)} .muted{font-size:var(--text-sm);color:var(--color-text-muted)} .site-list{display:grid;gap:var(--space-3);margin-top:var(--space-4)} .site-item{padding:var(--space-4);background:var(--color-surface-offset);border-radius:var(--radius-lg)} .site-item h3{margin:0 0 .35rem;font-size:var(--text-base)} .results-head{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-end;margin-bottom:var(--space-4)} .results{display:grid;gap:var(--space-4)} .result{padding:var(--space-5);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface-2)} .result h3{margin:0 0 .4rem;font-size:var(--text-lg)} .meta{display:flex;flex-wrap:wrap;gap:.6rem 1rem;font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-3)} .excerpt{color:var(--color-text)} .empty{padding:var(--space-10);text-align:center;color:var(--color-text-muted);background:var(--color-surface-offset);border-radius:var(--radius-lg)} .preview-card pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:var(--text-sm);color:var(--color-text-muted)} .toolbar{display:flex;gap:var(--space-3);align-items:center} .theme-toggle{width:44px;height:44px;border-radius:999px;background:var(--color-surface);border:1px solid var(--color-border)} .notice{margin-top:var(--space-4);padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-primary-highlight);color:var(--color-text);font-size:var(--text-sm)} @media (max-width: 900px){.hero,.controls{grid-template-columns:1fr}.grid{grid-template-columns:1fr}} 
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="logo">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-label="法規網站消息監測 App 標誌">
+          <rect x="5" y="7" width="26" height="34" rx="6" stroke-width="2.4"></rect>
+          <path d="M13 17h10M13 24h10M13 31h7" stroke-width="2.4" stroke-linecap="round"></path>
+          <circle cx="35" cy="31" r="8" stroke-width="2.4"></circle>
+          <path d="m40.5 36.5 4 4" stroke-width="2.4" stroke-linecap="round"></path>
+        </svg>
+        <div>法規網站消息監測 App</div>
+      </div>
+      <div class="toolbar">
+        <button class="theme-toggle" data-theme-toggle aria-label="切換深色模式">◐</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <article class="panel hero-card">
+        <h1>追蹤指定網站，在日期區間內篩出含關鍵字的最新消息。</h1>
+        <p>這是一個自建 Web App MVP 原型。網站名單獨立放在 <code>sites.json</code>，日後只要新增或修改設定檔，就能擴充追蹤來源。</p>
+        <div class="chips">
+          <span class="chip">日期區間</span>
+          <span class="chip">自訂關鍵字</span>
+          <span class="chip">連結 + 摘要</span>
+          <span class="chip">獨立網站清單檔</span>
+        </div>
+        <div class="notice">目前已預載 FDA News &amp; Events。若要正式上線，建議加上後端 proxy / crawler，才能穩定抓網站最新頁面內容並處理 CORS、反爬限制與排程。</div>
+      </article>
+      <aside class="panel stats">
+        <div class="stat"><span class="muted">目前追蹤網站</span><b id="siteCount">1</b></div>
+        <div class="stat"><span class="muted">搜尋模式</span><b>關鍵字 + 日期區間</b></div>
+        <div class="stat"><span class="muted">輸出內容</span><b>標題、日期、連結、摘要</b></div>
+      </aside>
+    </section>
+
+    <section class="controls">
+      <article class="panel form-card">
+        <h2>搜尋條件</h2>
+        <p class="muted">關鍵字請自行輸入，可用逗號分隔多組詞，例如：guidance, CMC, drug, device。</p>
+        <div class="grid">
+          <div class="field full">
+            <label for="keywords">關鍵字</label>
+            <input id="keywords" placeholder="例如：guidance, CMC, biologics" />
+          </div>
+          <div class="field">
+            <label for="startDate">開始日期</label>
+            <input id="startDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="endDate">結束日期</label>
+            <input id="endDate" type="date" />
+          </div>
+          <div class="field full">
+            <label for="siteSelect">追蹤網站</label>
+            <select id="siteSelect"></select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="runDemo">執行示範搜尋</button>
+          <button class="btn btn-secondary" id="loadConfig">重新讀取網站設定</button>
+        </div>
+      </article>
+
+      <article class="panel sites-card">
+        <h2>網站設定檔</h2>
+        <p class="muted">此區讀取 <code>sites.json</code>。日後新增網站時，只要補一筆設定即可。</p>
+        <div class="site-list" id="siteList"></div>
+      </article>
+    </section>
+
+    <section class="panel results-card">
+      <div class="results-head">
+        <div>
+          <h2>搜尋結果</h2>
+          <p class="muted">正式版可從後端 API 取得即時結果；此原型先示範資料結構、篩選流程與畫面。</p>
+        </div>
+        <div class="muted" id="resultCount">0 筆結果</div>
+      </div>
+      <div class="results" id="results"></div>
+    </section>
+
+    <section class="panel preview-card" style="margin-top:2rem;">
+      <h2>建議正式版 API 格式</h2>
+      <pre>{
+  "siteId": "fda-news-events",
+  "query": {
+    "keywords": ["guidance", "CMC"],
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-31"
+  },
+  "items": [
+    {
+      "title": "Example FDA news title",
+      "publishedAt": "2026-05-22",
+      "url": "https://www.fda.gov/...",
+      "excerpt": "First 200-500 characters of the page or article summary.",
+      "matchedKeywords": ["guidance"]
+    }
+  ]
+}</pre>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      sites: [],
+      results: []
+    };
+
+    const demoItems = [
+      {
+        siteId: 'fda-news-events',
+        title: 'FDA Public Meeting: Onshoring Manufacturing of Drugs and Biological Products',
+        publishedAt: '2025-09-29',
+        url: 'https://www.fda.gov/drugs/news-events-human-drugs/fda-public-meeting-onshoring-manufacturing-drugs-and-biological-products-09302025',
+        excerpt: 'Event title, meeting date, and written submission details appear on the FDA News & Events section. This is a sample item used to demonstrate title, date, link, and excerpt rendering.',
+        content: 'FDA Public Meeting: Onshoring Manufacturing of Drugs and Biological Products. September 30, 2025. Written or paper submissions are listed on the event page.',
+      },
+      {
+        siteId: 'fda-news-events',
+        title: 'FDA launches new adverse event look-up tool',
+        publishedAt: '2026-03-11',
+        url: 'https://www.fda.gov/news-events/press-announcements/fda-launches-new-adverse-event-look-tool',
+        excerpt: 'The FDA announced a unified platform for adverse event analysis. The tool combines information previously spread across several databases into a single dashboard.',
+        content: 'The FDA launched a new system designed to let the public and researchers more easily monitor side effects of regulated products in near real time.',
+      }
+    ];
+
+    const siteListEl = document.getElementById('siteList');
+    const siteSelectEl = document.getElementById('siteSelect');
+    const resultsEl = document.getElementById('results');
+    const resultCountEl = document.getElementById('resultCount');
+    const siteCountEl = document.getElementById('siteCount');
+
+    async function loadSites() {
+      try {
+        const res = await fetch('./sites.json');
+        const data = await res.json();
+        state.sites = data;
+        renderSites();
+      } catch (error) {
+        siteListEl.innerHTML = '<div class="empty">無法讀取 sites.json。請確認 App 是由本機伺服器或部署站點提供，而不是直接用 file:// 開啟。</div>';
+      }
+    }
+
+    function renderSites() {
+      siteCountEl.textContent = state.sites.length;
+      siteListEl.innerHTML = state.sites.map(site => `
+        <div class="site-item">
+          <h3>${site.name}</h3>
+          <div class="muted">${site.baseUrl}</div>
+          <div class="muted">型態：${site.type || 'news-page'}</div>
+        </div>
+      `).join('');
+      siteSelectEl.innerHTML = state.sites.map(site => `<option value="${site.id}">${site.name}</option>`).join('');
+    }
+
+    function matchesDate(itemDate, startDate, endDate) {
+      if (!itemDate) return false;
+      if (startDate && itemDate < startDate) return false;
+      if (endDate && itemDate > endDate) return false;
+      return true;
+    }
+
+    function matchesKeyword(item, keywords) {
+      if (!keywords.length) return true;
+      const haystack = `${item.title} ${item.excerpt} ${item.content}`.toLowerCase();
+      return keywords.some(keyword => haystack.includes(keyword));
+    }
+
+    function renderResults(items) {
+      resultCountEl.textContent = `${items.length} 筆結果`;
+      if (!items.length) {
+        resultsEl.innerHTML = '<div class="empty">目前沒有符合條件的消息。你可以更換日期區間、關鍵字，或在正式版連接後端資料來源。</div>';
+        return;
+      }
+      resultsEl.innerHTML = items.map(item => `
+        <article class="result">
+          <h3>${item.title}</h3>
+          <div class="meta">
+            <span>日期：${item.publishedAt}</span>
+            <span>來源：${lookupSiteName(item.siteId)}</span>
+          </div>
+          <p class="excerpt">${item.excerpt}</p>
+          <a href="${item.url}" target="_blank" rel="noopener noreferrer">開啟原始連結</a>
+        </article>
+      `).join('');
+    }
+
+    function lookupSiteName(siteId) {
+      return state.sites.find(site => site.id === siteId)?.name || siteId;
+    }
+
+    function runDemoSearch() {
+      const siteId = siteSelectEl.value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const keywords = document.getElementById('keywords').value
+        .split(',')
+        .map(v => v.trim().toLowerCase())
+        .filter(Boolean);
+
+      const filtered = demoItems
+        .filter(item => !siteId || item.siteId === siteId)
+        .filter(item => matchesDate(item.publishedAt, startDate, endDate))
+        .filter(item => matchesKeyword(item, keywords))
+        .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+
+      renderResults(filtered);
+    }
+
+    document.getElementById('runDemo').addEventListener('click', runDemoSearch);
+    document.getElementById('loadConfig').addEventListener('click', loadSites);
+    document.querySelector('[data-theme-toggle]').addEventListener('click', () => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    document.documentElement.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    loadSites().then(() => renderResults([]));
+  </script>
+</body>
+</html>
