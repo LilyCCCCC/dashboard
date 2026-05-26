@@ -44,7 +44,7 @@
       </article>
       <aside class="panel stats">
         <div class="stat"><span class="muted">目前追蹤網站</span><b id="siteCount">1</b></div>
-        <div class="stat"><span class="muted">搜尋模式</span><b>關鍵字 + 日期區間</b></div>
+        <div class="stat"><span class="muted">搜尋模式</span><b>關鍵字 + 日期 + 子頁全文</b></div>
         <div class="stat"><span class="muted">輸出內容</span><b>標題、日期、連結、摘要</b></div>
       </aside>
     </section>
@@ -52,7 +52,7 @@
     <section class="controls">
       <article class="panel form-card">
         <h2>搜尋條件</h2>
-        <p class="muted">關鍵字請自行輸入，可用逗號分隔多組詞，例如：guidance, CMC, drug, device。</p>
+        <p class="muted">關鍵字請自行輸入，可用逗號分隔多組詞，例如：guidance, CMC, drug, device。搜尋時會同時比對主頁與其子頁（連結）內容。</p>
         <div class="grid">
           <div class="field full">
             <label for="keywords">關鍵字</label>
@@ -88,7 +88,7 @@
       <div class="results-head">
         <div>
           <h2>搜尋結果</h2>
-          <p class="muted">正式版可從後端 API 取得即時結果；此原型先示範資料結構、篩選流程與畫面。</p>
+          <p class="muted">正式版可從後端 API 取得即時結果；此原型先示範「主頁 + 子頁」資料結構、篩選流程與畫面。</p>
         </div>
         <div class="muted" id="resultCount">0 筆結果</div>
       </div>
@@ -110,7 +110,8 @@
       "publishedAt": "2026-05-22",
       "url": "https://www.fda.gov/...",
       "excerpt": "First 200-500 characters of the page or article summary.",
-      "matchedKeywords": ["guidance"]
+      "matchedKeywords": ["guidance"],
+      "matchedSources": ["main", "child:https://www.fda.gov/.../detail"]
     }
   ]
 }</pre>
@@ -131,6 +132,18 @@
         url: 'https://www.fda.gov/drugs/news-events-human-drugs/fda-public-meeting-onshoring-manufacturing-drugs-and-biological-products-09302025',
         excerpt: 'Event title, meeting date, and written submission details appear on the FDA News & Events section. This is a sample item used to demonstrate title, date, link, and excerpt rendering.',
         content: 'FDA Public Meeting: Onshoring Manufacturing of Drugs and Biological Products. September 30, 2025. Written or paper submissions are listed on the event page.',
+        linkedPages: [
+          {
+            url: 'https://www.fda.gov/drugs/news-events-human-drugs/fda-public-meeting-onshoring-manufacturing-drugs-and-biological-products-09302025#registration',
+            title: 'Registration details',
+            content: 'Registration timeline, public docket number, and submission format guidance are listed for attendees.'
+          },
+          {
+            url: 'https://www.fda.gov/drugs/news-events-human-drugs/fda-public-meeting-onshoring-manufacturing-drugs-and-biological-products-09302025#agenda',
+            title: 'Agenda page',
+            content: 'The agenda includes biologics and CMC supply chain session topics.'
+          }
+        ],
       },
       {
         siteId: 'fda-news-events',
@@ -139,6 +152,13 @@
         url: 'https://www.fda.gov/news-events/press-announcements/fda-launches-new-adverse-event-look-tool',
         excerpt: 'The FDA announced a unified platform for adverse event analysis. The tool combines information previously spread across several databases into a single dashboard.',
         content: 'The FDA launched a new system designed to let the public and researchers more easily monitor side effects of regulated products in near real time.',
+        linkedPages: [
+          {
+            url: 'https://www.fda.gov/news-events/press-announcements/fda-launches-new-adverse-event-look-tool/methodology',
+            title: 'Methodology note',
+            content: 'Methodology explains pharmacovigilance signals, dashboard filters, and historical backfill processing.'
+          }
+        ],
       }
     ];
 
@@ -179,9 +199,36 @@
     }
 
     function matchesKeyword(item, keywords) {
-      if (!keywords.length) return true;
-      const haystack = `${item.title} ${item.excerpt} ${item.content}`.toLowerCase();
-      return keywords.some(keyword => haystack.includes(keyword));
+      if (!keywords.length) return { matched: true, matchedKeywords: [], matchedSources: [] };
+
+      const sourceBlocks = [
+        { source: 'main', text: `${item.title} ${item.excerpt} ${item.content}` }
+      ];
+
+      (item.linkedPages || []).forEach(page => {
+        sourceBlocks.push({
+          source: `child:${page.url}`,
+          text: `${page.title || ''} ${page.content || ''}`
+        });
+      });
+
+      const matchedKeywords = new Set();
+      const matchedSources = new Set();
+
+      keywords.forEach(keyword => {
+        sourceBlocks.forEach(block => {
+          if ((block.text || '').toLowerCase().includes(keyword)) {
+            matchedKeywords.add(keyword);
+            matchedSources.add(block.source);
+          }
+        });
+      });
+
+      return {
+        matched: matchedKeywords.size > 0,
+        matchedKeywords: [...matchedKeywords],
+        matchedSources: [...matchedSources]
+      };
     }
 
     function renderResults(items) {
@@ -196,6 +243,8 @@
           <div class="meta">
             <span>日期：${item.publishedAt}</span>
             <span>來源：${lookupSiteName(item.siteId)}</span>
+            <span>命中關鍵字：${(item.matchedKeywords || []).join('、') || '（未指定）'}</span>
+            <span>命中範圍：${(item.matchedSources || []).map(source => source === 'main' ? '主頁' : '子頁').join('、') || '主頁'}</span>
           </div>
           <p class="excerpt">${item.excerpt}</p>
           <a href="${item.url}" target="_blank" rel="noopener noreferrer">開啟原始連結</a>
@@ -219,7 +268,13 @@
       const filtered = demoItems
         .filter(item => !siteId || item.siteId === siteId)
         .filter(item => matchesDate(item.publishedAt, startDate, endDate))
-        .filter(item => matchesKeyword(item, keywords))
+        .map(item => ({ ...item, keywordMatch: matchesKeyword(item, keywords) }))
+        .filter(item => item.keywordMatch.matched)
+        .map(({ keywordMatch, ...item }) => ({
+          ...item,
+          matchedKeywords: keywordMatch.matchedKeywords,
+          matchedSources: keywordMatch.matchedSources
+        }))
         .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
       renderResults(filtered);
